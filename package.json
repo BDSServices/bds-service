@@ -1,0 +1,19 @@
+{
+  "name": "bds-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BDSServices/bds-service.git"
+  },
+  "author": "Madhu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BDSServices/bds-service/issues"
+  },
+  "homepage": "https://github.com/BDSServices/bds-service#readme"
+}
