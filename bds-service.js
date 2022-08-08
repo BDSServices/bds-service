@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const bdsutil = require('./src/api/bds-util.js');
 
 
 const hostname = '127.0.0.1';
@@ -19,13 +20,14 @@ const server = http.createServer(async (req, res) => {
                         res.end(data);
                     });
                     break;
-                // case '/search':
-                //     const titles = await searchTitles('Madhu', 'file1.xml.json', 'title', 'Title 00000', 1);
-                //     console.log(titles);
-                //     res.setHeader('content-Type', 'application/json');
-                //     res.writeHead(200);
-                //     res.end(JSON.stringify(titles));
-                //     break;
+                case '/home':
+                case '/search':
+                    const titles = await bdsutil.searchTitles('Madhu', 'file1.xml.json', 'title', 'Title 00000', 1);
+                    console.log(titles);
+                    res.setHeader('content-Type', 'application/json');
+                    res.writeHead(200);
+                    res.end(JSON.stringify(titles));
+                    break;
                 default:
                     res.setHeader('content-Type', `${url.search(/.js/) !== -1 ? 'text/javascript' : 'image/png'}`);
                     // console.log(`${url.search(/.js/) !== -1 ? 'text/javascript' : 'image/png'}`);
