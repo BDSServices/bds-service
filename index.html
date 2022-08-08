@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dialog Template</title>
+    <meta charset="UTF-8" />
+  </head>
+  <style>
+    body {
+      font-family: Times, "Work Sans", sans-serif;
+      margin: 0;
+      font-weight: 400;
+      /* background-image: linear-gradient(to right, rgba(250, 250, 250, 0.5), rgba(220, 220, 220, 0.5)); */
+     
+    }
+    h1, h2, h3 {
+      margin:0;
+      text-align: center;
+    }
+    header {
+      position:relative;
+      width: 100%;
+    }
+
+    content {
+      height: 75vh;
+      margin: 1rem;
+      overflow: scroll;
+      display: grid;
+      justify-content: center;
+    }
+    footer {
+      margin: 1rem;
+      text-align: center;
+    }
+    #launch-dialog {
+      background: tomato;
+      border-radius: 4px;
+      color: #fff;
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 0.5rem 1rem;
+      position: static;
+    }
+    .signon {
+      display: grid;
+      margin: 1rem;
+    }
+    #loading {
+      display:block;
+      text-align: center;
+    }
+    #loading:after {
+      display: inline-block;
+      font-size: 2rem;
+      font-weight: bold;
+      animation: dotty steps(1,end) 1s infinite;
+      content: '';
+    }
+    @keyframes dotty {
+      0% {content:'....';}
+      20% {content:'.....';}
+      40% {content:'......';}
+      60% {content:'.......';}
+      80% {content:'........';}
+      100% {content:'....';}
+    }
+  </style>
+  <body> 
+    <bds-idlewatch id="bdsIdlewatch" bds-idletimeout="10000" startstop=""></bds-idlewatch>
+    <header></header>
+    <search></search>
+    <main><content id="bdsContent"></content></main>
+    <footer>Copyright 2022 - BookDataSolutions.com</footer>
+    <bds-modal id="bdsModal"></bds-modal>
+<!-- --------------------------------------------------------------------------- -->
+    <script>
+      let currentChild = null;
+      const bdsDate = (dt) => {
+        return dt ? new Date(dt).toISOString() : new Date().toISOString();
+      }
+      ///////////////////////////////////////////////////////////////////////////////////////////
+      const navItems = `[
+        {"item":"Home","icon":"./assets/home.png", "display":"all"},
+        {"item":"Contact","icon":"./assets/contact.png", "display":"all"},
+        {"item":"Terms","icon":"./assets/terms.png", "display":"all"},
+        {"item":"Signon","icon":"./assets/signon.png", "display":"signedoff"},
+        {"item":"Signoff","icon":"./assets/signout.png", "display":"signedin"},
+        {"item":"Register","icon":"./assets/register.png", "display":"signedoff"},
+        {"item":"Workque","icon":"./assets/home.png", "display":"signedin"}
+      ]`;
+
+      const listItems = `[
+        {"filename": "Onixfile1.xml", "filetype":"Onix", "filesize":"50", "loaded":"${bdsDate(Date.now())}"},
+        {"filename": "Excelfile1.xslx", "filetype":"Excel", "filesize":"25", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile2.xml", "filetype":"Onix", "filesize":"80", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile2.xlsx", "filetype":"Excel", "filesize":"40", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile3.xml", "filetype":"Onix", "filesize":"1", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile3.xlsx", "filetype":"Excel", "filesize":"2", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile4.xml", "filetype":"Onix", "filesize":"4", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile4.xlsx", "filetype":"Excel", "filesize":"8", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile5.xml", "filetype":"Onix", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile5.xlsx", "filetype":"Excel", "filesize":"20", "loaded":"${bdsDate(1655074238987)}"},
+        
+        {"filename": "Onixfile6.xml", "filetype":"Onix", "filesize":"5", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile6.xlsx", "filetype":"Excel", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile7.xml", "filetype":"Onix", "filesize":"11", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile7.xlsx", "filetype":"Excel", "filesize":"22", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile8.xml", "filetype":"Onix", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile8.xlsx", "filetype":"Excel", "filesize":"20", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile9.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile9.xlsx", "filetype":"Excel", "filesize":"6", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile10.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile10.xlsx", "filetype":"Excel", "filesize":"3", "loaded":"${bdsDate()}"},
+        
+        {"filename": "Onixfile21.xml", "filetype":"Onix", "filesize":"5", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile22.xlsx", "filetype":"Excel", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile23.xml", "filetype":"Onix", "filesize":"11", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile24.xlsx", "filetype":"Excel", "filesize":"22", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile25.xml", "filetype":"Onix", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile26.xlsx", "filetype":"Excel", "filesize":"20", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile27.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile28.xlsx", "filetype":"Excel", "filesize":"6", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile29.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile30.xlsx", "filetype":"Excel", "filesize":"3", "loaded":"${bdsDate()}"},
+        
+        {"filename": "Onixfile31.xml", "filetype":"Onix", "filesize":"5", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile32.xlsx", "filetype":"Excel", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile33.xml", "filetype":"Onix", "filesize":"11", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile34.xlsx", "filetype":"Excel", "filesize":"22", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile35.xml", "filetype":"Onix", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile36.xlsx", "filetype":"Excel", "filesize":"20", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile37.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile38.xlsx", "filetype":"Excel", "filesize":"6", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile39.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile40.xlsx", "filetype":"Excel", "filesize":"3", "loaded":"${bdsDate()}"},
+        
+        {"filename": "Onixfile41.xml", "filetype":"Onix", "filesize":"5", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile42.xlsx", "filetype":"Excel", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile43.xml", "filetype":"Onix", "filesize":"11", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile44.xlsx", "filetype":"Excel", "filesize":"22", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile45.xml", "filetype":"Onix", "filesize":"10", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile46.xlsx", "filetype":"Excel", "filesize":"20", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile47.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile48.xlsx", "filetype":"Excel", "filesize":"6", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Onixfile49.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
+        {"filename": "Excelfile50.xlsx", "filetype":"Excel", "filesize":"3", "loaded":"${bdsDate()}"}
+      ]`;
+
+      const bdsComponents = {
+        Home: { component: "<section><h1>Home</h1><h3>Welcome to Bookdatasolutions!</h3></section>", target: "content" },
+        Contact: { component: "<h1>Contact not Implemented!</h1>", target: "content" },
+        Terms: { component: "<h1>Terms not Implemented!</h1>", target: "content" },
+        Signon: { component: "<bds-signon/>", target: "bds-modal" },
+        Signoff: { component: "<h1>Your are now Logged off!</h1>", target: "content" },
+        Register: { component: "<h1>Register not Implemented!</h1>", target: "content" },
+        Workque: { component: `<bds-list list-hdr="My Workqueue" list-Items='${listItems}'></bds-list><div id="loading"></div>`, target: "content" }
+      };
+
+      document.querySelector("header").innerHTML = `<bds-nav id="bdsNav" nav-items='${navItems}' logo="BookDataSolutions" loggedin="false"></bds-nav>`;
+      //document.querySelector("content").innerHTML = bdsComponents.Home.component;
+      bdsNav.onclick = (e) => {
+        const launch = e.composedPath()[1].id;  // e.composedPath[0] => SPAN/IMG, e.composedPath[1] => A => works for both IMG and SPAN children
+        if (launch === 'Home') {
+          console.log("Retrieving Home page from BDS Server")
+          fetch('./home', {method: 'GET', mode: 'no-cors', headers: {'Content-Type': 'text/plain'}})
+          .then(res => res.json())
+          .then(data => {
+            console.log(data);
+            let titles = '';
+            data.forEach(item => {
+              const title = JSON.parse(item);
+              titles += `<tr><td>${title.recref}</td><td>${title.title}<td>${title.author}</td></td></tr>`;
+            });
+            document.querySelector(`content`).innerHTML = `<table border="1" width="600px"></tr><th>RecRef</th><th>Title</th><th>Author</th></tr>${titles}</table>`;
+            // if (currentChild) {
+            //   console.log("Removing child Script!") 
+            //   document.body.removeChild(currentChild);
+            // }
+            // const home = document.createElement("script");
+            // home.appendChild(document.createTextNode(data));
+            // document.body.appendChild(home);
+            // currentChild = home;
+          });
+        }
+        else 
+        if (bdsComponents[launch]) {
+          const { component, target } = bdsComponents[launch];
+          document.querySelector(`${target}`).innerHTML = `${component}`;
+          // if (target === "bds-modal") document.querySelector(`${target}`).open = true;
+          document.querySelector(`${target}`).open = true; // for modals
+
+          // Event Listeners
+          // Signoff
+          if (launch === "Signoff") {
+            bdsNav.setAttribute("loggedin", "false"); 
+            bdsIdlewatch.setAttribute("startstop", "stop");
+          }
+          // Signon
+          if (component.indexOf("bds-signon") !== -1) {
+            document.querySelector("bds-signon").addEventListener("bds-signon-submit", (e) => {
+              console.log(e.detail.email, e.detail.pwd);  
+              bdsNav.setAttribute("loggedin", "true");          
+              document.querySelector(`${bdsComponents.Workque.target}`).innerHTML = `${bdsComponents.Workque.component}`;
+              document.querySelector(`${target}`).open = false; 
+              bdsIdlewatch.setAttribute("startstop", "start");
+            });
+          }
+        }
+      };
+      
+      bdsIdlewatch.addEventListener("bds-timedoff", (e) => {
+        bdsNav.setAttribute("loggedin", "false"); 
+        bdsContent.innerHTML = `<section><h1>Home</h1><h3>Welcome to Bookdatasolutions!</h3></section>`;
+        bdsModal.innerHTML = `<br/><br/><h2>You are now logged off due to inactivity!</h2><br/><h3>Please login back to view your workque</h3>`;
+        bdsModal.open = true;
+      });
+      ///////////////////////////////////////////////////////////////////////////////////////////
+
+      // Idle time detection
+    </script>
+
+    <!-- <script type="module" src="./bds-idlewatch.js"></script> -->
+    <script type="module" src="./src/components/bds-nav.js"></script>
+    <script defer type="module" src="./src/components/bds-modal.js"></script>
+    <script defer type="module" src="./src/components/bds-signon.js"></script>
+    <script defer type="module" src="./src/components/bds-search.js"></script>
+    <script defer type="module" src="./src/components/bds-list.js"></script>
+  </body>
+</html>
