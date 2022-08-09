@@ -27,7 +27,7 @@ export class BDSSearch extends HTMLElement {
                 }
                 search input[type=search]{
                     box-sizing: border-box;
-                    background-image: url("../assets/search.png");
+                    background-image: url("../../assets/search.png");
                     background-position: 10px 5px;
                     background-repeat: no-repeat;
                     padding: 12px 10px 12px 40px;

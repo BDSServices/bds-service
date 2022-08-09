@@ -30,8 +30,6 @@ const server = http.createServer(async (req, res) => {
                     break;
                 default:
                     res.setHeader('content-Type', `${url.search(/.js/) !== -1 ? 'text/javascript' : 'image/png'}`);
-                    // console.log(`${url.search(/.js/) !== -1 ? 'text/javascript' : 'image/png'}`);
-                    // console.log(path.join(__dirname, url));
                     res.writeHead(200);
                     fs.readFile(path.join(__dirname, url), (err, data) => {
                         res.end(data);

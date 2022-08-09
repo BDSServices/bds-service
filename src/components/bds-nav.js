@@ -50,7 +50,7 @@ export class BDSNav extends HTMLElement {
           margin: 1rem 0;
         }
         search input[type=search]{
-          background-image: url("./search.png");
+          background-image: url("./assets/search.png");
           background-position: 10px 4px;
           background-repeat: no-repeat;
           padding-left: 40px;
@@ -59,12 +59,18 @@ export class BDSNav extends HTMLElement {
           transition: width 0.4s ease-in-out;
           border: none;
           height: 1.75rem;
-          border-radius: 4px;
+          border-radius: 4px 0 0 4px;
         }
         search input[type=search]:focus{
           width: 75%;
         }
-    
+        button {
+          background: rgb(50 50 50);
+          border: none;
+          color: white;
+          border-radius: 0 4px 4px 0;
+          height: 1.75rem;
+        }    
         nav {
           position: absolute;
           text-align: left;
@@ -155,6 +161,8 @@ export class BDSNav extends HTMLElement {
           top: 0.3rem;
         }
 
+
+        
       @media screen and (min-width: 900px) {
           .menu-label {
             display: none;
@@ -181,7 +189,7 @@ export class BDSNav extends HTMLElement {
             margin: 1rem 0;
           }
           search input[type=search]{
-            background-image: url("./search.png");
+            background-image: url("./assets/search.png");
             background-position: 10px 4px;
             background-repeat: no-repeat;
             padding-left: 40px;
@@ -190,12 +198,18 @@ export class BDSNav extends HTMLElement {
             transition: width 0.4s ease-in-out;
             border: none;
             height: 1.75rem;
-            border-radius: 4px;
+            border-radius: 4px 0 0 4px;
           }
           search input[type=search]:focus{
             width: 100%;
           }
-
+          button {
+            background: rgb(50 50 50);
+            border: none;
+            color: white;
+            border-radius: 0 4px 4px 0;
+            height: 1.75rem;
+          }  
           nav {
             all: unset;
             display: flex;
@@ -243,7 +257,7 @@ export class BDSNav extends HTMLElement {
         <input type="checkbox" class="menu" id="menu">
         <label for="menu" class="menu-label"><span/><span/></label>      
         <span class="logo">${this.logo}</span>
-        <search><input type="search" placeholder="Search My Workqueue"></search>
+        <search><input id="bds-searchkey" type="search" placeholder="Search My Workqueue"><button id="bds-search-submit">GO</button></search>
         <nav>
           <ul>
             ${navlist}
@@ -261,9 +275,13 @@ export class BDSNav extends HTMLElement {
     }
     
     this.shadowRoot.addEventListener("click", (e) => {
+    
       if (e.composedPath()[1].id) {
         // tag <a> has the id
         this.shadowRoot.getElementById("menu").checked = false; // close sidebar when the menu item is selected
+      }
+      if (e.target.id === 'bds-search-submit') {
+        this.dispatchEvent(new CustomEvent("bds-search-submit", { detail: { searchkey: this.shadowRoot.getElementById("bds-searchkey").value} }));
       }
     });
   }
