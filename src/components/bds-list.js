@@ -5,29 +5,32 @@ export class BDSList extends HTMLElement {
         this.attachShadow({ mode: "open" });
         this.bdslisthdr = this.getAttribute("list-hdr");
         this.bdslist = JSON.parse(this.getAttribute("list-items"));
-        //console.log(this.bdslist);  
+        // console.log(this.bdslist);
         this.totalrecs = this.bdslist.length;
         this.batchstart = 0;
+        this.pagenum = 1;
     }
 
     connectedCallback() {
-        const addContent = () => {
-            //console.log(this.batchstart)
-            if (this.batchstart >= this.totalrecs)
-                return;
+        // const addContent = () => {
+        //     //if (this.batchstart >= this.totalrecs)
+        //     //    return;
 
-            for (let i=this.batchstart; i<this.batchstart+10; i++){
-                const details = document.createElement('details');
-                const summary = document.createElement('summary');
-                summary.textContent = this.bdslist[i].filename;
-                const div = document.createElement('div');
-                div.innerHTML = `File Type: ${this.bdslist[i].filetype}<br/>File Size: ${this.bdslist[i].filesize}<br/>Loaded: 2022-06-20;`
-                details.appendChild(summary);
-                details.appendChild(div);
-                this.shadowRoot.appendChild(details);
-            }
-            this.batchstart += 10;
-        }        
+        //     for (let i=this.batchstart; i<this.batchstart+10; i++){
+        //         const details = document.createElement('details');
+        //         const summary = document.createElement('summary');
+        //         // summary.textContent = this.bdslist[i].filename;
+        //         summary.textContent = this.bdslist[i].title;
+        //         const div = document.createElement('div');
+        //         div.innerHTML = `Author: ${this.bdslist[i].author}<br/>Record Reference: ${this.bdslist[i].recref}<br/>Loaded: 2022-06-20;`
+        //         // div.innerHTML = `File Type: ${this.bdslist[i].filetype}<br/>File Size: ${this.bdslist[i].filesize}<br/>Loaded: 2022-06-20;`
+        //         details.appendChild(summary);
+        //         details.appendChild(div);
+        //         this.shadowRoot.appendChild(details);
+        //     }
+        //     this.batchstart += 10;
+        //     this.pagenum++;
+        // }        
 
         this.shadowRoot.innerHTML = `
             <style>
@@ -119,17 +122,54 @@ export class BDSList extends HTMLElement {
             rootMargin: '0px',
             threshold: 0.8
           }
-        let handleIntersect = (entries, observer) => {
+        // let handleIntersect = (entries, observer) => {
+        //     //console.log(entries[0].intersectionRatio);
+        //     if (entries[0].intersectionRatio>0) {
+        //         this.dispatchEvent(new CustomEvent("bds-paging", { detail: {pagenum: this.pagenum} }));   
+        //         setTimeout(() => {addContent();}, 2000);
+        //     }
+        // }
+        let observer = new IntersectionObserver((entries, observer) => {
             //console.log(entries[0].intersectionRatio);
             if (entries[0].intersectionRatio>0) {
-                setTimeout(() => {addContent();}, 2000);
+                this.dispatchEvent(new CustomEvent("bds-paging", { detail: {pagenum: this.pagenum} }));   
+                // setTimeout(() => {addContent();}, 2000);
             }
-            
-        }
-        let observer = new IntersectionObserver(handleIntersect, options);
+        }, options);
         observer.observe(document.querySelector('#loading'));        
         //content:"🡒 "; 
-        //content:"🡑 ";
+        //content:"🡑 ";        
     }
+
+    static get observedAttributes() {
+        return ["list-items"];
+      }
+    
+      attributeChangedCallback(name, oldValue, newValue) {
+        this.bdslist = oldValue !== newValue && newValue !== '[]' ? [...this.bdslist, ...JSON.parse(`[${newValue}]`)] : this.bdslist;
+        if(this.bdslist.length > 0 && newValue){
+            this.addContent();
+        }
+      }    
+
+      addContent = () => {
+        //if (this.batchstart >= this.totalrecs)
+        //    return;
+        for (let i=this.batchstart; i<this.batchstart+10; i++){
+            const details = document.createElement('details');
+            const summary = document.createElement('summary');
+            // summary.textContent = this.bdslist[i].filename;
+            summary.textContent = this.bdslist[i].title;
+            const div = document.createElement('div');
+            div.innerHTML = `Author: ${this.bdslist[i].author}<br/>Record Reference: ${this.bdslist[i].recref}<br/>Loaded: 2022-06-20;`
+            // div.innerHTML = `File Type: ${this.bdslist[i].filetype}<br/>File Size: ${this.bdslist[i].filesize}<br/>Loaded: 2022-06-20;`
+            details.appendChild(summary);
+            details.appendChild(div);
+            this.shadowRoot.appendChild(details);
+        }
+        this.batchstart += 10;
+        this.pagenum++;
+    }        
+
 }
 window.customElements.define("bds-list", BDSList);

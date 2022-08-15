@@ -144,7 +144,7 @@
         {"filename": "Onixfile49.xml", "filetype":"Onix", "filesize":"3", "loaded":"${bdsDate(1655074238987)}"},
         {"filename": "Excelfile50.xlsx", "filetype":"Excel", "filesize":"3", "loaded":"${bdsDate()}"}
       ]`;
-
+console.log(listItems.slice(1,9));
       const bdsComponents = {
         Home: { component: "<section><h1>Home</h1><h3>Welcome to Bookdatasolutions!</h3></section>", target: "content" },
         Contact: { component: "<h1>Contact not Implemented!</h1>", target: "content" },
@@ -152,7 +152,7 @@
         Signon: { component: "<bds-signon/>", target: "bds-modal" },
         Signoff: { component: "<h1>Your are now Logged off!</h1>", target: "content" },
         Register: { component: "<h1>Register not Implemented!</h1>", target: "content" },
-        Workque: { component: `<bds-list list-hdr="My Workqueue" list-Items='${listItems}'></bds-list><div id="loading"></div>`, target: "content" }
+        Workque: { component: `<bds-list list-hdr="My Workqueue" list-Items=[]></bds-list><div id="loading"></div>`, target: "content" }
       };
 
       document.querySelector("header").innerHTML = `<bds-nav id="bdsNav" nav-items='${navItems}' logo="BookDataSolutions" loggedin="false"></bds-nav>`;
@@ -199,9 +199,22 @@
             document.querySelector("bds-signon").addEventListener("bds-signon-submit", (e) => {
               console.log(e.detail.email, e.detail.pwd);  
               bdsNav.setAttribute("loggedin", "true");          
-              document.querySelector(`${bdsComponents.Workque.target}`).innerHTML = `${bdsComponents.Workque.component}`;
+              //document.querySelector(`${bdsComponents.Workque.target}`).innerHTML = `${bdsComponents.Workque.component}`;
               document.querySelector(`${target}`).open = false; 
               bdsIdlewatch.setAttribute("startstop", "start");
+            });
+          }
+          // bds-list
+          if (launch === "Workque") {
+            console.log('Adding event listener for bds-list!');
+            document.querySelector("bds-list").addEventListener("bds-paging", (e) => {
+              console.log(`Pagenum: ${e.detail.pagenum}`);
+              fetch(`./getTitles?searchkey=Title 00001&pagenum=${e.detail.pagenum}`, {method: 'GET', mode: 'no-cors', headers: {'Content-Type': 'application/json'}})
+              .then(res => res.json())
+              .then(data => {
+                // console.log(data);
+                document.querySelector("bds-list").setAttribute("list-items", data);
+              });
             });
           }
         }
@@ -212,6 +225,10 @@
         bdsContent.innerHTML = `<section><h1>Home</h1><h3>Welcome to Bookdatasolutions!</h3></section>`;
         bdsModal.innerHTML = `<br/><br/><h2>You are now logged off due to inactivity!</h2><br/><h3>Please login back to view your workque</h3>`;
         bdsModal.open = true;
+      });
+
+      document.querySelector("bds-nav").addEventListener("bds-search-submit", (e) => {
+        console.log(`Searching "${e.detail.searchkey}"...`);
       });
       ///////////////////////////////////////////////////////////////////////////////////////////
 
