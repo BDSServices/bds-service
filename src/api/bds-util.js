@@ -6,6 +6,22 @@ const readline = require('readline');
 // const http = require('http');
 // const { hostname } = require('os');
 
+const db = require('nedb');
+const coll = new db({filename:`${__dirname}/users/Madhu/temp/neDbSample.txt`, autoload: true});
+console.log(`${__dirname}/users/Madhu/temp/neDbSample.txt`);
+// create random nedb data
+const createNedbTitles = () => {
+    const titles = [];
+    for (let i=5; i>0; i--) {
+        let titlesuffix = '0'.repeat(7-i.toString().length) + i.toString();
+        const title = JSON.parse(`{"recref": "${Math.floor(Math.random() * 100000000)}", "title": "Title ${titlesuffix}", "author": "Author ${Math.random().toString(36).substring(2)}"}\n`);
+        titles.push(title);
+        coll.insert(titles, (err, docs) => {
+           console.log(docs.length);
+        });
+    }
+}
+
 // create random json data
 const createRandomTitles = (file) => {
     for (let i=1000000; i>0; i--) {
@@ -100,10 +116,10 @@ const sortTitles = (user, file, sortby) => {
 //sortTitles('Madhu', 'file1.xml.json', 'author');
 
 
-const searchTitles = async (user, file, searchby, searchkey, pagenum) => {
+const searchTitles = async (user, file, searchby, searchkey, pagenum, pagesize) => {
     let titles = [];
-    let pagestart = (pagenum-1) * 10;
-    let pageend = pagenum * 10;
+    let pagestart = (pagenum-1) * pagesize;
+    let pageend = pagenum * pagesize;
     const stream = readline.createInterface ({
         input: fs.createReadStream(path.join(__dirname, `../../users/${user}/${file}.${searchby}`), {flag: 'r', encoding: 'utf-8'}),
         crlfDelay: Infinity
@@ -114,15 +130,19 @@ const searchTitles = async (user, file, searchby, searchkey, pagenum) => {
         const title = JSON.parse(line).title;
         if (title.search(`${searchkey}`) !== -1) {
             if (ind >= pagestart && ind < pageend) {
-                if (titles.length < 10) 
+                if (titles.length < pagesize) {
                     titles.push(line);
+                }
             }
-            // if (titles.length == 10) 
-                // break;
             ind++;
         }
     }
-    //console.log(titles, `${pagestart+1} - ${pageend} of ${ind}`);
+    if (titles.length > 0) {
+        const rec1 = JSON.parse(titles[0]);
+        rec1.file = ind; // total records
+        titles[0] = JSON.stringify(rec1);
+    }
+    console.log(titles, `${pagestart+1} - ${pageend} of ${ind}`);
     return titles;
 
 }
@@ -162,4 +182,4 @@ const searchTitles = async (user, file, searchby, searchkey, pagenum) => {
 //     console.log(`BDS Server running at http://${hostname}:${port}`);
 // });
 
-module.exports = {searchTitles};
+module.exports = {createNedbTitles,searchTitles};

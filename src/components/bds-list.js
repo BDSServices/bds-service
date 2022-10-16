@@ -4,34 +4,15 @@ export class BDSList extends HTMLElement {
         super();
         this.attachShadow({ mode: "open" });
         this.bdslisthdr = this.getAttribute("list-hdr");
-        this.bdslist = JSON.parse(this.getAttribute("list-items"));
-        // console.log(this.bdslist);
+        this.bdslist = this.getAttribute("list-items");//JSON.parse(this.getAttribute("list-items"));
+        this.batchsize = parseInt(this.getAttribute("list-size"));
         this.totalrecs = this.bdslist.length;
         this.batchstart = 0;
         this.pagenum = 1;
+        // this.dispatchEvent(new CustomEvent("bds-paging", { detail: {pagenum: this.pagenum} })); 
     }
 
     connectedCallback() {
-        // const addContent = () => {
-        //     //if (this.batchstart >= this.totalrecs)
-        //     //    return;
-
-        //     for (let i=this.batchstart; i<this.batchstart+10; i++){
-        //         const details = document.createElement('details');
-        //         const summary = document.createElement('summary');
-        //         // summary.textContent = this.bdslist[i].filename;
-        //         summary.textContent = this.bdslist[i].title;
-        //         const div = document.createElement('div');
-        //         div.innerHTML = `Author: ${this.bdslist[i].author}<br/>Record Reference: ${this.bdslist[i].recref}<br/>Loaded: 2022-06-20;`
-        //         // div.innerHTML = `File Type: ${this.bdslist[i].filetype}<br/>File Size: ${this.bdslist[i].filesize}<br/>Loaded: 2022-06-20;`
-        //         details.appendChild(summary);
-        //         details.appendChild(div);
-        //         this.shadowRoot.appendChild(details);
-        //     }
-        //     this.batchstart += 10;
-        //     this.pagenum++;
-        // }        
-
         this.shadowRoot.innerHTML = `
             <style>
   
@@ -39,8 +20,16 @@ export class BDSList extends HTMLElement {
                     margin: 0;
                     text-align: center;
                 }
-                section {
+                .pageinfo {
+                    text-align: center;
+                    font-weight: 700;
+                }
+                .bdslist {
                     width:90vw;
+                    height:70vh;
+                    position:relative;
+                    top: 0px;
+                    overflow:scroll;
                 }              
                 details {   
                     margin:0;           
@@ -68,7 +57,9 @@ export class BDSList extends HTMLElement {
                 }            
                 summary {
                     padding: 1rem 3rem;
-                    display: block;
+                    display: flex;
+                    flex-direction: row;
+                    gap:1rem;
                     position: relative;
                     font-size: 1.25rem;
                     font-weight: bold;
@@ -82,7 +73,7 @@ export class BDSList extends HTMLElement {
                     width: 0.75rem;
                     height: 2px;
                     position: absolute;
-                    top: 50%;
+                    top: 27.5%;
                     left: 0;
                     content: "";
                     background-color: currentColor;
@@ -106,19 +97,43 @@ export class BDSList extends HTMLElement {
                     transform-origin: top;
                     transition: transform 300ms;
                     border: 0.1px solid lightgray;
-                    /*box-shadow: 0 0.25em 0.5em #263238;*/
+                    box-shadow: 0 0.25em 0.5em #263238;
                 }
                 details[open] > :not(summary) {
                     transform: scaleY(1);
                 }
+                #loading {
+                    display:block;
+                    text-align: center;
+                }
+                #loading:after {
+                    display: inline-block;
+                    font-size: 2rem;
+                    font-weight: bold;
+                    animation: dotty steps(1,end) 1s infinite;
+                    content: '';
+                }
+                @keyframes dotty {
+                    0% {content:'....';}
+                    20% {content:'.....';}
+                    40% {content:'......';}
+                    60% {content:'.......';}
+                    80% {content:'........';}
+                    100% {content:'....';}
+                }
+              
             </style>
-            <section>
-                <h3>${this.bdslisthdr}</h3>
-            </section>
+            <h2>${this.bdslisthdr}</h2>
+            <div class="pageinfo"></div>            
+            <div class="bdslist">
+                <section></section>
+                <br/>
+                <div id="loading"></div>
+            </div>
         `;
 
         let options = {
-            root: document.querySelector('main'),
+            root: document.querySelector('section'),
             rootMargin: '0px',
             threshold: 0.8
           }
@@ -133,10 +148,9 @@ export class BDSList extends HTMLElement {
             //console.log(entries[0].intersectionRatio);
             if (entries[0].intersectionRatio>0) {
                 this.dispatchEvent(new CustomEvent("bds-paging", { detail: {pagenum: this.pagenum} }));   
-                // setTimeout(() => {addContent();}, 2000);
             }
         }, options);
-        observer.observe(document.querySelector('#loading'));        
+        observer.observe(this.shadowRoot.querySelector('#loading'));        
         //content:"🡒 "; 
         //content:"🡑 ";        
     }
@@ -146,28 +160,46 @@ export class BDSList extends HTMLElement {
       }
     
       attributeChangedCallback(name, oldValue, newValue) {
-        this.bdslist = oldValue !== newValue && newValue !== '[]' ? [...this.bdslist, ...JSON.parse(`[${newValue}]`)] : this.bdslist;
+        //this.bdslist = oldValue !== newValue && newValue !== '[]' ? [...this.bdslist, ...JSON.parse(`[${newValue}]`)] : this.bdslist;
+        this.bdslist += oldValue !== newValue && newValue !== '' ? newValue : this.bdslist;
         if(this.bdslist.length > 0 && newValue){
-            this.addContent();
+           this.addContent();
         }
       }    
 
       addContent = () => {
+        const section1 = this.shadowRoot.querySelector('section').innerHTML = this.bdslist;
+        this.pagenum++;
+        return;
         //if (this.batchstart >= this.totalrecs)
         //    return;
-        for (let i=this.batchstart; i<this.batchstart+10; i++){
+        const pageend = this.batchstart+this.batchsize;
+        const section = this.shadowRoot.querySelector('section');
+        for (let i=this.batchstart; i<pageend && this.bdslist[i]; i++){
             const details = document.createElement('details');
             const summary = document.createElement('summary');
             // summary.textContent = this.bdslist[i].filename;
-            summary.textContent = this.bdslist[i].title;
+            //summary.textContent = this.bdslist[i].title;
+            summary.innerHTML = `
+                <div>${i+1}.</div> 
+                <div>
+                    <div>${this.bdslist[i].title}</div>
+                    <div style="font-size:0.8rem;font-weight:400;">Author: <em>${this.bdslist[i].author}</em><br/>Record Reference: <em>${this.bdslist[i].recref}</em><br/>Loaded: <em>2022-06-20</em></div>
+                </div>
+                `;               
             const div = document.createElement('div');
             div.innerHTML = `Author: ${this.bdslist[i].author}<br/>Record Reference: ${this.bdslist[i].recref}<br/>Loaded: 2022-06-20;`
             // div.innerHTML = `File Type: ${this.bdslist[i].filetype}<br/>File Size: ${this.bdslist[i].filesize}<br/>Loaded: 2022-06-20;`
             details.appendChild(summary);
             details.appendChild(div);
-            this.shadowRoot.appendChild(details);
+            section.appendChild(details);
         }
-        this.batchstart += 10;
+        const pageinfo = this.shadowRoot.querySelector('.pageinfo')
+        pageinfo.innerHTML = `
+            <h4>(file1.xml.json)</h4>
+            <div>1 - ${pageend < this.bdslist[0].file ? pageend : this.bdslist[0].file} of ${this.bdslist[0].file} Titles</div>
+        `;
+        this.batchstart += this.batchsize;
         this.pagenum++;
     }        
 

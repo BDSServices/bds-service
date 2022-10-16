@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/BDSServices/bds-service/issues"
   },
-  "homepage": "https://github.com/BDSServices/bds-service#readme"
+  "homepage": "https://github.com/BDSServices/bds-service#readme",
+  "dependencies": {
+    "nedb": "^1.8.0"
+  }
 }
